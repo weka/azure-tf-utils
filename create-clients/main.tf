@@ -50,7 +50,7 @@ locals {
   public_ssh_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : file(var.ssh_public_key)
   private_ssh_key           = var.ssh_private_key == null ? tls_private_key.ssh_key[0].private_key_pem : file(var.ssh_private_key)
   alphanumeric_prefix_name  = lower(replace(var.prefix,"/\\W|_|\\s/",""))
-  nics_number               = var.install_dpdk ? var.nics_map[var.instance_type] : 2
+  nics_number               = 2
   netmask                   = split("/",data.azurerm_subnet.subnets[0].address_prefix)[1]
   vmss_name                 = var.custom_image_id != null ? azurerm_linux_virtual_machine_scale_set.custom_image_vmss[0].name : azurerm_linux_virtual_machine_scale_set.default_image_vmss[0].name
 
@@ -146,7 +146,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "custom_image_vmss" {
       ip_configuration {
         primary                                = true
         name                                   = "ipconfig-${network_interface.value}"
-        subnet_id                              = data.azurerm_subnet.subnets[1].id
+        subnet_id                              = data.azurerm_subnet.subnets[0].id
        # load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
       }
     }
@@ -222,7 +222,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "default_image_vmss" {
       ip_configuration {
         primary                                = true
         name                                   = "ipconfig-${network_interface.value}"
-        subnet_id                              = data.azurerm_subnet.subnets[1].id
+        subnet_id                              = data.azurerm_subnet.subnets[0].id
        # load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
       }
     }
