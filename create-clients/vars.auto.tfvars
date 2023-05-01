@@ -1,0 +1,14 @@
+prefix             = "client"
+rg_name            = "denise"
+clients_name       = "dpdk"
+clients_size       = 2
+install_ofed       = false
+install_dpdk       = true
+subnets_name       = ["four-subnet-1","four-subnet-2"]
+vnet_name          = "four-vnet"
+sg_name            = "four-sg"
+instance_type      = "Standard_L8s_v3"
+backend_ip         = "20.168.197.88"
+custom_image_id    = "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/weka-tf/providers/Microsoft.Compute/images/weka-ofed-image"
+ssh_private_key    = "/tmp/four-subnets-private-key.pem"
+ssh_public_key     = "/tmp/four-subnets-public-key.pem"
