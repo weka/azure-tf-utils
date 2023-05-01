@@ -68,7 +68,7 @@ function getNetStrForDpdk() {
 			j=$2
 			net=""
 			gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
-			for ((i; i<$j; i++)); do
+			for ((i; i<=$j; i++)); do
 			  net="$net -o net="
 				eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
 				enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
