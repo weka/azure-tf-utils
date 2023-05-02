@@ -21,7 +21,7 @@ if [[ ${install_ofed} == true ]]; then
 fi
 
 # config network with multi nics
-if [[ false == true ]]; then
+if [[ ${install_dpdk} == true ]]; then
   for(( i=0; i<${nics_num}; i++)); do
     echo "20$i eth$i-rt" >> /etc/iproute2/rt_tables
   done
@@ -54,28 +54,26 @@ fi
 apt update -y
 apt install -y jq
 apt install -y fio
+
 rm -rf $INSTALLATION_PATH
 
 # install weka
-#curl https://${token}@get.weka.io/dist/v1/install/${weka_version}/${weka_version} | sh
-curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-09ec0d9afa5c8c98bc509df031ac03e6/4.2.1.10683-b6e17d9ed5be83e40e43ce9e2c431689 | sh
-
-
+curl http://${backend_private_ip}:14000/dist/v1/install | sh
 
 # mount client
 function getNetStrForDpdk() {
-      i=$1
-			j=$2
-			net=""
-			gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
-			for ((i; i<=$j; i++)); do
-			  net="$net -o net="
-				eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
-				enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
-				bits=$(ip -o -f inet addr show eth$i | awk '{print $4}')
-				IFS='/' read -ra netmask <<< "$bits"
-				net="$net$enp/$eth/${netmask}/$gateway"
-			done
+  i=$1
+  j=$2
+  net=""
+  gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
+  for ((i; i<$j; i++)); do
+    net="$net -o net="
+	  eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
+    enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
+    bits=$(ip -o -f inet addr show eth$i | awk '{print $4}')
+    IFS='/' read -ra netmask <<< "$bits"
+		net="$net$enp/$eth/${netmask}/$gateway"
+	done
 }
 
 FILESYSTEM_NAME=default # replace with a different filesystem at need
@@ -84,8 +82,8 @@ mkdir -p $MOUNT_POINT
 
 eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
 if [[ ${install_dpdk} == true ]]; then
-  getNetStrForDpdk 1 $((${nics_num}-1))
-  mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
+  getNetStrForDpdk 1 2 #$((${nics_num}))
+  mount -t wekafs $net -o num_cores=$(($i-1)) -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 else
   mount -t wekafs -o net=udp -o mgmt_ip=$eth0 -o num_cores=1 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 fi
