@@ -4,11 +4,9 @@ variable "weka_version" {
   default = "4.1.0.71"
 }
 
-variable "get_weka_io_token" {
+variable "backend_ip" {
   type = string
-  description = "The token to download the Weka release from get.weka.io."
-  default = ""
-  sensitive = true
+  description = ""
 }
 
 variable "nics" {
@@ -37,12 +35,6 @@ variable "custom_image_id" {
   type        = string
   description = "Custom image id"
   default     = null
-}
-
-variable "prefix" {
-  type = string
-  description = "The prefix for all the resource names. For example, the prefix for your system name."
-  default = "weka"
 }
 
 variable "rg_name" {
@@ -118,14 +110,21 @@ variable "install_ofed" {
   description = "Install ofed for weka cluster with dpdk configuration"
 }
 
-variable "backend_ip" {
-  type = string
-}
-
 variable "nics_map" {
   type = map(number)
   default = {
     Standard_L8s_v3 = 4
     Standard_L16s_v3 = 8
   }
+}
+
+variable "ppg_name" {
+  type = string
+  default = null
+}
+
+variable "get_weka_io_token" {
+  type = string
+  description = "The token to download the Weka release from get.weka.io."
+  sensitive = true
 }
