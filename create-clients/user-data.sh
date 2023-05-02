@@ -20,8 +20,15 @@ if [[ ${install_ofed} == true ]]; then
 
 fi
 
+
+for(( i=0; i<${nics_num}; i++ )); do
+    cat <<-EOF | sed -i "/        eth$i/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
+            mtu: 3900
+EOF
+done
+
 # config network with multi nics
-if [[ false == true ]]; then
+if [[ ${install_dpdk} == true ]]; then
   for(( i=0; i<${nics_num}; i++)); do
     echo "20$i eth$i-rt" >> /etc/iproute2/rt_tables
   done
@@ -32,7 +39,6 @@ if [[ false == true ]]; then
   for(( i=0; i<${nics_num}; i++ )); do
     eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
     cat <<-EOF | sed -i "/            set-name: eth$i/r /dev/stdin" /etc/netplan/50-cloud-init.yaml
-            mtu: 3900
             routes:
              - to: ${subnet_range}
                via: $gateway
@@ -48,44 +54,46 @@ if [[ false == true ]]; then
                table: 20$i
 EOF
   done
-  netplan apply
 fi
+
+netplan apply
 
 apt update -y
 apt install -y jq
 apt install -y fio
+
 rm -rf $INSTALLATION_PATH
 
 # install weka
-#curl https://${token}@get.weka.io/dist/v1/install/${weka_version}/${weka_version} | sh
-curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-09ec0d9afa5c8c98bc509df031ac03e6/4.2.1.10683-b6e17d9ed5be83e40e43ce9e2c431689 | sh
-
-
+curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-3d10be9f40c27bf083d68c2d16253163/4.2.1.10852-1f5e36232a39f9b56954e93fe5a426b1 | sh
 
 # mount client
 function getNetStrForDpdk() {
-      i=$1
-			j=$2
-			net=""
-			gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
-			for ((i; i<=$j; i++)); do
-			  net="$net -o net="
-				eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
-				enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
-				bits=$(ip -o -f inet addr show eth$i | awk '{print $4}')
-				IFS='/' read -ra netmask <<< "$bits"
-				net="$net$enp/$eth/${netmask}/$gateway"
-			done
+  i=$1
+  j=$2
+  net=""
+  gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
+  for ((i; i<$j; i++)); do
+    net="$net -o net="
+	  eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
+    enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
+    bits=$(ip -o -f inet addr show eth$i | awk '{print $4}')
+    IFS='/' read -ra netmask <<< "$bits"
+		net="$net$enp/$eth/${netmask}/$gateway"
+	done
 }
 
 FILESYSTEM_NAME=default # replace with a different filesystem at need
 MOUNT_POINT=/mnt/weka # replace with a different mount point at need
 mkdir -p $MOUNT_POINT
 
+weka local stop
+weka local rm default --force
+
 eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
 if [[ ${install_dpdk} == true ]]; then
-  getNetStrForDpdk 1 $((${nics_num}-1))
-  mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
+  getNetStrForDpdk 1 2 #$((${nics_num}))
+  mount -t wekafs $net -o num_cores=$(($i-1)) -o mgmt_ip=$eth0 ${backend_private_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 else
-  mount -t wekafs -o net=udp -o mgmt_ip=$eth0 -o num_cores=1 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
+  mount -t wekafs -o net=udp ${backend_private_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 fi

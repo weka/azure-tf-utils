@@ -46,29 +46,28 @@ resource "local_file" "private_key" {
 }
 
 locals {
-  ssh_path                  = "/tmp/${var.prefix}-${var.clients_name}"
-  public_ssh_key            = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : file(var.ssh_public_key)
-  private_ssh_key           = var.ssh_private_key == null ? tls_private_key.ssh_key[0].private_key_pem : file(var.ssh_private_key)
-  alphanumeric_prefix_name  = lower(replace(var.prefix,"/\\W|_|\\s/",""))
-  nics_number               = var.install_dpdk ? var.nics_map[var.instance_type] : 2
-  netmask                   = split("/",data.azurerm_subnet.subnets[0].address_prefix)[1]
-  vmss_name                 = var.custom_image_id != null ? azurerm_linux_virtual_machine_scale_set.custom_image_vmss[0].name : azurerm_linux_virtual_machine_scale_set.default_image_vmss[0].name
+  ssh_path           = "/tmp/${var.clients_name}"
+  public_ssh_key     = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : file(var.ssh_public_key)
+  private_ssh_key    = var.ssh_private_key == null ? tls_private_key.ssh_key[0].private_key_pem : file(var.ssh_private_key)
+  nics_number        = 2 #var.install_dpdk ? var.ilength(var.subnets_name)
+  netmask            = split("/",data.azurerm_subnet.subnets[0].address_prefix)[1]
+  vmss_name          = var.custom_image_id != null ? azurerm_linux_virtual_machine_scale_set.custom_image_vmss[0].name : azurerm_linux_virtual_machine_scale_set.default_image_vmss[0].name
 
 }
 
 data "template_file" "init" {
   template = file("${path.module}/user-data.sh")
   vars = {
-    private_ssh_key = local.private_ssh_key
-    ofed_version    = var.ofed_version
-    install_ofed    = var.install_ofed
-    weka_version    = var.weka_version
-    backend_ip      = var.backend_ip
-    install_dpdk    = var.install_dpdk
-    nics_num        = local.nics_number
-    netmask         = local.netmask
-    subnet_range    = data.azurerm_subnet.subnets[0].address_prefix
-    token           = var.get_weka_io_token
+    private_ssh_key    = local.private_ssh_key
+    ofed_version       = var.ofed_version
+    install_ofed       = var.install_ofed
+    weka_version       = var.weka_version
+    token              = var.get_weka_io_token
+    install_dpdk       = var.install_dpdk
+    nics_num           = local.nics_number
+    netmask            = local.netmask
+    backend_private_ip = var.backend_private_ip
+    subnet_range       = data.azurerm_subnet.subnets[0].address_prefix
   }
 }
 
@@ -81,26 +80,33 @@ data "template_cloudinit_config" "cloud_init" {
 }
 
 resource "azurerm_proximity_placement_group" "ppg" {
-  name                = "${var.prefix}-${var.clients_name}-clients-ppg"
+  count               = var.ppg_name == null ? 1 : 0
+  name                = "${var.clients_name}-clients-ppg"
   location            = data.azurerm_resource_group.rg.location
   resource_group_name = var.rg_name
   tags                = merge({"weka_cluster": var.clients_name})
 }
 
+data "azurerm_proximity_placement_group" "use_ppg" {
+  count               = var.ppg_name != null ? 1 : 0
+  name                = var.ppg_name
+  resource_group_name = var.rg_name
+}
+
+
 resource "azurerm_linux_virtual_machine_scale_set" "custom_image_vmss" {
   count                           = var.custom_image_id != null ? 1 : 0
-  name                            = "${var.prefix}-${var.clients_name}-clients-vmss"
+  name                            = "${var.clients_name}-clients-vmss"
   location                        = data.azurerm_resource_group.rg.location
   resource_group_name             = var.rg_name
   sku                             = var.instance_type
   upgrade_mode                    = "Manual"
-  #health_probe_id                 = azurerm_lb_probe.backend_lb_probe.id
   admin_username                  = var.vm_username
   instances                       = var.clients_size
-  computer_name_prefix            = "${var.prefix}-${var.clients_name}-client-vmss"
+  computer_name_prefix            = "${var.clients_name}-client-vmss"
   custom_data                     = base64encode(data.template_file.init.rendered)
   disable_password_authentication = true
-  proximity_placement_group_id    = azurerm_proximity_placement_group.ppg.id
+  proximity_placement_group_id    = var.ppg_name == null ? azurerm_proximity_placement_group.ppg[0].id : data.azurerm_proximity_placement_group.use_ppg[0].id
   tags                            = merge( {"weka_cluster": var.clients_name})
   source_image_id                 = var.custom_image_id
 
@@ -121,7 +127,7 @@ resource "azurerm_linux_virtual_machine_scale_set" "custom_image_vmss" {
   dynamic "network_interface" {
     for_each = range(0,1)
     content {
-      name                      = "${var.prefix}-${var.clients_name}-client-nic"
+      name                      = "${var.clients_name}-client-nic"
       network_security_group_id = data.azurerm_network_security_group.sg_id.id
       primary                   = true
       enable_accelerated_networking = true
@@ -129,9 +135,8 @@ resource "azurerm_linux_virtual_machine_scale_set" "custom_image_vmss" {
         primary                                = true
         name                                   = "ipconfig1"
         subnet_id                              = data.azurerm_subnet.subnets[0].id
-        #load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
         public_ip_address {
-          name = "${var.prefix}-${var.clients_name}-public-ip"
+          name = "${var.clients_name}-public-ip"
         }
       }
     }
@@ -139,39 +144,36 @@ resource "azurerm_linux_virtual_machine_scale_set" "custom_image_vmss" {
   dynamic "network_interface" {
     for_each = range(1, local.nics_number)
     content {
-      name                      = "${var.prefix}-${var.clients_name}-client-nic-${network_interface.value}"
-      network_security_group_id = data.azurerm_network_security_group.sg_id.id
-      primary                   = false
+      name                          = "${var.clients_name}-client-nic-${network_interface.value}"
+      network_security_group_id     = data.azurerm_network_security_group.sg_id.id
+      primary                       = false
       enable_accelerated_networking = true
       ip_configuration {
-        primary                                = true
-        name                                   = "ipconfig-${network_interface.value}"
-        subnet_id                              = data.azurerm_subnet.subnets[1].id
-       # load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
+        primary       = true
+        name          = "ipconfig-${network_interface.value}"
+        subnet_id     = data.azurerm_subnet.subnets[0].id
       }
     }
   }
   lifecycle {
     ignore_changes = [ instances, custom_data ]
   }
-  #depends_on = [azurerm_lb_backend_address_pool.lb_backend_pool,azurerm_lb_probe.backend_lb_probe,azurerm_proximity_placement_group.ppg, azurerm_lb_rule.backend_lb_rule, azurerm_lb_rule.ui_lb_rule]
 }
 
 
 resource "azurerm_linux_virtual_machine_scale_set" "default_image_vmss" {
   count                           = var.custom_image_id == null ? 1 : 0
-  name                            = "${var.prefix}-${var.clients_name}-clients-vmss"
+  name                            = "${var.clients_name}-clients-vmss"
   location                        = data.azurerm_resource_group.rg.location
   resource_group_name             = var.rg_name
   sku                             = var.instance_type
   upgrade_mode                    = "Manual"
- # health_probe_id                 = azurerm_lb_probe.backend_lb_probe.id
   admin_username                  = var.vm_username
   instances                       = var.clients_size
-  computer_name_prefix            = "${var.prefix}-${var.clients_name}-client"
+  computer_name_prefix            = "${var.clients_name}-client"
   custom_data                     = base64encode(data.template_file.init.rendered)
   disable_password_authentication = true
-  proximity_placement_group_id    = azurerm_proximity_placement_group.ppg.id
+  proximity_placement_group_id    = var.ppg_name == null ? azurerm_proximity_placement_group.ppg[0].id : data.azurerm_proximity_placement_group.use_ppg[0].id
   tags                            = merge({"weka_cluster": var.clients_name})
   source_image_reference {
     offer     = lookup(var.linux_vm_image, "offer", null)
@@ -196,17 +198,16 @@ resource "azurerm_linux_virtual_machine_scale_set" "default_image_vmss" {
   dynamic "network_interface" {
     for_each = range(0,1)
     content {
-      name                          = "${var.prefix}-${var.clients_name}-client-nic"
+      name                          = "${var.clients_name}-client-nic"
       network_security_group_id     = data.azurerm_network_security_group.sg_id.id
       primary                       = true
       enable_accelerated_networking = var.install_dpdk
       ip_configuration {
-        primary                                = true
-        name                                   = "ipconfig1"
-        subnet_id                              = data.azurerm_subnet.subnets[0].id
-       # load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
+        primary      = true
+        name         = "ipconfig1"
+        subnet_id    = data.azurerm_subnet.subnets[0].id
         public_ip_address {
-          name = "${var.prefix}-${var.clients_name}-public-ip"
+          name = "${var.clients_name}-public-ip"
         }
       }
     }
@@ -214,16 +215,15 @@ resource "azurerm_linux_virtual_machine_scale_set" "default_image_vmss" {
   dynamic "network_interface" {
     for_each = range(1,local.nics_number)
     content {
-      name                          = "${var.prefix}-${var.clients_name}-clients-nic-${network_interface.value}"
+      name                          = "${var.clients_name}-clients-nic-${network_interface.value}"
       network_security_group_id     = data.azurerm_network_security_group.sg_id.id
       primary                       = false
       enable_accelerated_networking = var.install_dpdk
 
       ip_configuration {
-        primary                                = true
-        name                                   = "ipconfig-${network_interface.value}"
-        subnet_id                              = data.azurerm_subnet.subnets[1].id
-       # load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.lb_backend_pool.id]
+        primary       = true
+        name          = "ipconfig-${network_interface.value}"
+        subnet_id     = data.azurerm_subnet.subnets[0].id
       }
     }
   }
