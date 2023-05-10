@@ -65,7 +65,7 @@ apt install -y fio
 rm -rf $INSTALLATION_PATH
 
 # install weka
-curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-783b1834d3a44a16f65fe63a58318e88/4.2.1.11403-ae23a095dda862fb0633c8d3674c6e18 | sh
+curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-783b1834d3a44a16f65fe63a58318e88/4.2.1.11442-7b94ffd18c5c3936edb94271c49004cf | sh
 
 # mount client
 function getNetStrForDpdk() {
