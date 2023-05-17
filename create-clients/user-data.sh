@@ -65,22 +65,51 @@ apt install -y fio
 rm -rf $INSTALLATION_PATH
 
 # install weka
-curl https://${token}@get.prod.weka.io/dist/v1/install/4.2.1-783b1834d3a44a16f65fe63a58318e88/4.2.1.11442-7b94ffd18c5c3936edb94271c49004cf | sh
+curl https://${token}@get.weka.io/dist/v1/install/4.2.0.86-beta/4.2.0.86-beta | sh
 
 # mount client
 function getNetStrForDpdk() {
   i=$1
   j=$2
-  net=""
-  gateway=$(route -n | grep 0.0.0.0 | grep UG | awk '{print $2}')
+  gateways=$3
+  subnets=$4
+
+  if [ -n "$gateways" ]; then #azure and gcp
+    gateways=($gateways)
+  fi
+
+  if [ -n "$subnets" ]; then #azure only
+    subnets=($subnets)
+  fi
+
+  net=" "
   for ((i; i<$j; i++)); do
-    net="$net -o net="
-	  eth=$(ifconfig | grep eth$i -C2 | grep 'inet ' | awk '{print $2}')
-    enp=$(ls -l /sys/class/net/eth$i/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}')
-    bits=$(ip -o -f inet addr show eth$i | awk '{print $4}')
+    if [ -n "$subnets" ]; then
+      subnet=$${subnets[$i]}
+      subnet_inet=$(curl -s -H Metadata:true –noproxy “*” http://169.254.169.254/metadata/instance/network\?api-version\=2021-02-01 | jq --arg subnet "$subnet" '.interface[] | select(.ipv4.subnet[0].address==$subnet)' | jq -r .ipv4.ipAddress[0].privateIpAddress)
+      eth=$(ifconfig | grep -B 1 $subnet_inet |  head -n 1 | cut -d ':' -f1)
+    else
+      eth=eth$i
+      subnet_inet=$(ifconfig $eth | grep 'inet ' | awk '{print $2}')
+    fi
+    if [ -z $subnet_inet ];then
+      net=""
+      break
+    fi
+    enp=$(ls -l /sys/class/net/$eth/ | grep lower | awk -F"_" '{print $2}' | awk '{print $1}') #for azure
+    if [ -z $enp ];then
+      enp=$eth
+    fi
+    bits=$(ip -o -f inet addr show $eth | awk '{print $4}')
     IFS='/' read -ra netmask <<< "$bits"
-		net="$net$enp/$eth/${netmask}/$gateway"
-	done
+
+    if [ -n "$gateways" ]; then
+      gateway=$${gateways[$i]}
+      net="$net -o net=$enp/$subnet_inet/$${netmask[1]}/$gateway"
+    else
+      net="$net -o net=$eth" #aws
+    fi
+  done
 }
 
 FILESYSTEM_NAME=default # replace with a different filesystem at need
@@ -91,10 +120,12 @@ weka local stop
 weka local rm default --force
 weka local stop && weka local rm -f --all
 
+gateways="10.0.2.1 10.0.3.1 10.0.4.1 10.0.5.1"
+subnets="10.0.2.0 10.0.3.0 10.0.4.0 10.0.5.0"
 eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
 if [[ ${install_dpdk} == true ]]; then
-  getNetStrForDpdk 1 2 #$((${nics_num}))
-  mount -t wekafs $net -o num_cores=$(($i-1)) -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
+  getNetStrForDpdk 2 3 "$gateways" "$subnets"
+  mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 else
   mount -t wekafs -o net=udp ${backend_ip}/$FILESYSTEM_NAME $MOUNT_POINT
 fi

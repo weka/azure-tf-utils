@@ -48,9 +48,7 @@ resource "local_file" "private_key" {
 locals {
   ssh_path           = "/tmp/${var.clients_name}"
   public_ssh_key     = var.ssh_public_key == null ? tls_private_key.ssh_key[0].public_key_openssh : file(var.ssh_public_key)
-  private_ssh_key    = var.ssh_private_key == null ? tls_private_key.ssh_key[0].private_key_pem : file(var.ssh_private_key)
   nics_number        = 4 #var.install_dpdk ? var.ilength(var.subnets_name)
-  netmask            = split("/",data.azurerm_subnet.subnets[0].address_prefix)[1]
   vmss_name          = var.custom_image_id != null ? azurerm_linux_virtual_machine_scale_set.custom_image_vmss[0].name : azurerm_linux_virtual_machine_scale_set.default_image_vmss[0].name
 
 }
@@ -58,14 +56,11 @@ locals {
 data "template_file" "init" {
   template = file("${path.module}/user-data.sh")
   vars = {
-    private_ssh_key    = local.private_ssh_key
     ofed_version       = var.ofed_version
     install_ofed       = var.install_ofed
-    weka_version       = var.weka_version
     token              = var.get_weka_io_token
     install_dpdk       = var.install_dpdk
     nics_num           = local.nics_number
-    netmask            = local.netmask
     backend_ip         = var.backend_ip
     subnet_range       = data.azurerm_subnet.subnets[0].address_prefix
   }
