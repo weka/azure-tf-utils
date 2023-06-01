@@ -1,0 +1,62 @@
+{
+  "variables": {
+    "ofed_version": "5.8-1.1.2.1",
+    "subscription_id": "{{env `SUBSCRIPTION_ID`}}",
+    "client_id": "{{env `CLIENT_ID`}}",
+    "client_secret": "{{env `CLIENT_SECRET`}}",
+    "tenant_id": "{{env `TENANT_ID`}}",
+    "image_rg_name": "weka-tf"
+  },
+  "builders": [
+    {
+      "type": "azure-arm",
+      "subscription_id": "{{user `subscription_id`}}",
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+      "managed_image_resource_group_name": "{{user `image_rg_name`}}",
+      "managed_image_name": "weka-ubuntu20-custom-image",
+      "os_type": "Linux",
+      "location": "East US",
+      "image_publisher": "Canonical",
+      "image_offer": "0001-com-ubuntu-server-focal",
+      "image_sku": "20_04-lts-gen2",
+      "vm_size": "Standard_L8s_v3",
+      "ssh_username": "weka"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "script": "./downgrade_kernel_to_5.4.sh"
+    },
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "echo 'Restarting VM in 10 seconds'",
+        "sleep 10",
+        "reboot"
+      ],
+      "pause_before": "10s",
+      "pause_after": "30s",
+      "expect_disconnect": true
+    },
+    {
+      "type": "shell",
+      "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+      "inline": [
+        "echo 'Install OFED VM'",
+        "INSTALLATION_PATH=/tmp/weka",
+        "mkdir -p $INSTALLATION_PATH",
+        "OFED_NAME=ofed-{{user `ofed_version`}}",
+        "wget https://content.mellanox.com/ofed/MLNX_OFED-{{user `ofed_version`}}/MLNX_OFED_LINUX-{{user `ofed_version`}}-ubuntu20.04-x86_64.tgz -O $INSTALLATION_PATH/$OFED_NAME.tgz",
+        "tar xf $INSTALLATION_PATH/$OFED_NAME.tgz --directory $INSTALLATION_PATH --one-top-level=$OFED_NAME",
+        "cd $INSTALLATION_PATH/$OFED_NAME/*/",
+        "./mlnxofedinstall --without-fw-update --add-kernel-support --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
+        "/etc/init.d/openibd restart"
+      ]
+      }
+  ]
+}
