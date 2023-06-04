@@ -5,7 +5,7 @@
     "client_id": "{{env `CLIENT_ID`}}",
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
-    "image_rg_name": "weka-tf"
+    "image_rg_name": "{{env `IMAGE_RG_NAME`}}"
   },
   "builders": [
     {
