@@ -19,6 +19,16 @@
       "os_type": "Linux",
       "location": "East US",
 
+      "shared_image_gallery_destination": {
+        "resource_group": "weka-tf",
+        "gallery_name": "wekasig",
+        "image_name": "weka-ubuntu20.04",
+        "image_version": "1.0.3",
+        "replication_regions": [
+          "westeurope",
+          "eastus"
+        ]
+      },
       "azure_tags": {
         "Image Publisher" : "Weka",
         "Image Offer": "WekaUbuntu",
