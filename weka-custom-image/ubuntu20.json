@@ -5,7 +5,8 @@
     "client_id": "{{env `CLIENT_ID`}}",
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
-    "image_rg_name": "{{env `IMAGE_RG_NAME`}}"
+    "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
+    "region": "East US"
   },
   "builders": [
     {
@@ -17,10 +18,10 @@
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
       "managed_image_name": "weka-ubuntu20.04-kernel5.4-image",
       "os_type": "Linux",
-      "location": "East US",
+      "location": "{{user `region`}}",
 
       "azure_tags": {
-        "Image Publisher" : "Weka",
+        "Image Publisher" : "WekaIO",
         "Image Offer": "WekaUbuntu",
         "Image SKU": "20.04",
         "Kernel Version": "5.4"
@@ -38,16 +39,6 @@
       "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
       "inline": [
           "set -ex",
-          "systemctl stop unattended-upgrades",
-          "systemctl disable unattended-upgrades",
-          "while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do",
-              "sleep 2",
-          "done",
-          "apt remove unattended-upgrades -y",
-          "apt update -y",
-          "apt upgrade -y",
-
-          "apt install net-tools -y",
           "kernel_version=$(hostnamectl | grep Kernel | awk '{print $3}')",
           "downgrade_kernel_version=5.4.0-1107",
           "apt search linux- | grep ${downgrade_kernel_version}-azure | grep -v 'linux-modules-nvidia\\|linux-objects-nvidia\\|signatures\\|linux-modules-extra' | awk -F\"/\" '{print $1}' | xargs -I {} apt install -y {}",
@@ -70,11 +61,24 @@
       "expect_disconnect": true
     },
     {
+       "type": "shell",
+       "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+       "inline": [
+          "systemctl stop unattended-upgrades",
+          "systemctl disable unattended-upgrades",
+          "while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do",
+             "sleep 2",
+          "done",
+          "apt remove unattended-upgrades -y",
+          "apt install net-tools -y",
+          "snap install jq"
+         ]
+    },
+    {
       "type": "shell",
       "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
       "inline": [
         "echo 'Install OFED VM'",
-        "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
         "INSTALLATION_PATH=/tmp/weka",
         "mkdir -p $INSTALLATION_PATH",
         "OFED_NAME=ofed-{{user `ofed_version`}}",
@@ -83,8 +87,9 @@
         "cd $INSTALLATION_PATH/$OFED_NAME/*/",
         "./mlnxofedinstall --without-fw-update --add-kernel-support --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
         "/etc/init.d/openibd restart",
-        "ofed_info -n"
+        "ofed_info -n",
+        "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')"
       ]
-      }
+    }
   ]
 }
