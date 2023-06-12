@@ -21,16 +21,38 @@
       "location": "{{user `region`}}",
 
       "shared_image_gallery_destination": {
-        "resource_group": "weka-tf",
-        "gallery_name": "wekasig",
-        "image_name": "weka-ubuntu20.04",
-        "image_version": "1.0.3",
+        "resource_group": "weka-images",
+        "gallery_name": "WekaComputeGallery",
+        "image_name": "ubuntu20.04",
+        "image_version": "1.0.0",
         "replication_regions": [
-          "eastus"
+          "eastus",
+          "eastus2",
+          "brazilsouth",
+          "canadacentral",
+          "centralus",
+          "northcentralus",
+          "southcentralus",
+          "westus",
+          "westus2",
+          "westus3",
+          "francecentral",
+          "germanywestcentral",
+          "northeurope",
+          "westeurope",
+          "uksouth",
+          "swedencentral",
+          "qatarcentral",
+          "australiaeast",
+          "australiasoutheast",
+          "centralindia",
+          "japaneast",
+          "eastasia",
+          "southeastasia"
         ]
       },
       "azure_tags": {
-        "Image Publisher" : "Weka",
+        "Image Publisher" : "WekaIO",
         "Image Offer": "WekaUbuntu",
         "Image SKU": "20.04",
         "Kernel Version": "5.4"
