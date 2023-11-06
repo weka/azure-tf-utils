@@ -6,7 +6,9 @@
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
     "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
-    "region": "East US"
+    "region": "East US",
+    "token": "{{env `TOKEN`}}",
+    "weka_version": "4.2.5"
   },
   "builders": [
     {
@@ -16,7 +18,7 @@
       "client_secret": "{{user `client_secret`}}",
       "tenant_id": "{{user `tenant_id`}}",
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
-      "managed_image_name": "weka-ubuntu20.04-kernel5.4-image",
+      "managed_image_name": "weka-ubuntu20.04-kernel5.4-image-with-rpms-4.2.5",
       "os_type": "Linux",
       "location": "{{user `region`}}",
 
@@ -24,7 +26,7 @@
         "resource_group": "weka-images",
         "gallery_name": "WekaComputeGallery",
         "image_name": "ubuntu20.04",
-        "image_version": "1.0.0",
+        "image_version": "2.0.3",
         "replication_regions": [
           "eastus",
           "eastus2",
@@ -120,7 +122,16 @@
               "./mlnxofedinstall --without-fw-update --add-kernel-support --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
               "/etc/init.d/openibd restart",
               "ofed_info -n",
-              "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')"
+              "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
+              "echo \"Installing az cli\"",
+              "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
+              "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
+              "curl https://{{ user `token` }}@get.prod.weka.io/dist/v1/install/{{ user `weka_version` }}/{{ user `weka_version` }} | sh",
+              "mkdir /root/weka-prepackaged",
+              "cd /opt/weka/data",
+              "cp -rf dependencies uio_generic weka_driver igb_uio  /root/weka-prepackaged",
+              "weka local stop && weka local rm -f --all",
+              "weka agent uninstall --force"
             ]
           }
     ]
