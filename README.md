@@ -10,6 +10,7 @@ export CLIENT_ID=8e3799f8-8d44-4448-9980-836a7dc47880
 export CLIENT_SECRET=""
 export TENANT_ID=93ba0df2-e204-4bfc-99ef-cb9e273ce33f
 export IMAGE_RG_NAME=weka-images
+export TOKEN=""
 ```
 
 ### To create only image run:
