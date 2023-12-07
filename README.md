@@ -21,3 +21,11 @@ run: `packer build ubuntu20.json`
 change version var `image_version` to new version ( it will as latest version)
 
 run: `packer build shared_ubuntu20.json`
+
+
+#### Creating private network with FW:
+Notion link https://www.notion.so/wekaio/Private-network-with-FW-dc661cc832444145b326581b3bae5f4a
+```
+TF_VAR_subscription_id=<subscription-id> terraform init
+TF_VAR_subscription_id=<subscription-id> terraform apply
+```

@@ -96,11 +96,11 @@ variable "role_permission" {
       "Microsoft.Network/privateDnsZones/A/write",
       "Microsoft.Network/privateDnsZones/A/delete",
       "Microsoft.Compute/proximityPlacementGroups/*",
-      "Microsoft.Network/virtualNetworks/join/action", #
-      "Microsoft.Network/virtualNetworks/subnets/join/action",#
-      "Microsoft.Network/virtualNetworks/subnets/write",#
-      "Microsoft.Network/virtualNetworks/subnets/delete",#
-      "Microsoft.Network/networkSecurityGroups/join/action",#
+      "Microsoft.Network/virtualNetworks/join/action",         #
+      "Microsoft.Network/virtualNetworks/subnets/join/action", #
+      "Microsoft.Network/virtualNetworks/subnets/write",       #
+      "Microsoft.Network/virtualNetworks/subnets/delete",      #
+      "Microsoft.Network/networkSecurityGroups/join/action",   #
       "Microsoft.Network/loadBalancers/read",
       "Microsoft.Network/loadBalancers/write",
       "Microsoft.Network/loadBalancers/delete",

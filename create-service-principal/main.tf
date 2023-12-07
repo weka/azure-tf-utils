@@ -25,9 +25,9 @@ locals {
   }
   role_name         = "${var.role_type}_${var.prefix}_custom_role"
   vnet_permission   = var.use_network == true ? var.role_permission.allow_read_network_permission : concat(var.role_permission.allow_write_delete_network_permissions, var.role_permission.allow_read_network_permission)
-  actions           = var.role_type == "all" ? concat(local.vnet_permission,var.role_permission.all) : concat(local.vnet_permission,var.role_permission.essential)
+  actions           = var.role_type == "all" ? concat(local.vnet_permission, var.role_permission.all) : concat(local.vnet_permission, var.role_permission.essential)
   scope             = var.use_network == true ? data.azurerm_subscription.primary.id : "${data.azurerm_subscription.primary.id}/resourceGroups/${var.rg_name}"
-  assignable_scopes = var.use_network == true && var.vnet_rg_name != "" ? ["${data.azurerm_subscription.primary.id}/resourceGroups/${var.rg_name}","${data.azurerm_subscription.primary.id}/resourceGroups/${var.vnet_rg_name}"] : ["${data.azurerm_subscription.primary.id}/resourceGroups/${var.rg_name}"]
+  assignable_scopes = var.use_network == true && var.vnet_rg_name != "" ? ["${data.azurerm_subscription.primary.id}/resourceGroups/${var.rg_name}", "${data.azurerm_subscription.primary.id}/resourceGroups/${var.vnet_rg_name}"] : ["${data.azurerm_subscription.primary.id}/resourceGroups/${var.rg_name}"]
 }
 
 resource "azuread_application" "app" {
