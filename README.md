@@ -22,6 +22,10 @@ change version var `image_version` to new version ( it will as latest version)
 
 run: `packer build shared_ubuntu20.json`
 
+### Build image for testing 
+change version var `image_version` to new version ( it will as latest version)
+run: `packer build testing_ubuntu20.json`
+
 
 #### Creating private network with FW:
 Notion link https://www.notion.so/wekaio/Private-network-with-FW-dc661cc832444145b326581b3bae5f4a
