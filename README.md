@@ -13,11 +13,6 @@ export IMAGE_RG_NAME=weka-images
 export TOKEN=""
 ```
 
-### To create only image run:
-change image name `managed_image_name`
-
-run: `packer build ubuntu20.json`
-
 ### To create new version of gallery image as public image run:
 change version var `image_version` to new version ( it will as latest version)
 
@@ -25,6 +20,7 @@ run: `packer build shared_ubuntu20.json`
 
 ### Build image for testing 
 change version var `image_version` to new version ( it will as latest version)
+chnage version var `weka_version`
 run: `packer build testing_ubuntu20.json`
 
 

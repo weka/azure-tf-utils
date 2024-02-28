@@ -6,7 +6,9 @@
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
     "image_rg_name": "weka-image-testing",
-    "region": "East US"
+    "region": "East US",
+    "token": "{{env `TOKEN`}}",
+    "weka_version": "4.2.5"
   },
   "builders": [
     {
@@ -88,7 +90,16 @@
         "./mlnxofedinstall --without-fw-update --add-kernel-support --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
         "/etc/init.d/openibd restart",
         "ofed_info -n",
-        "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')"
+        "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
+        "echo \"Installing az cli\"",
+        "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
+        "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
+        "curl https://{{ user `token` }}@get.prod.weka.io/dist/v1/install/{{ user `weka_version` }}/{{ user `weka_version` }} | sh",
+        "mkdir /root/weka-prepackaged",
+        "cd /opt/weka/data",
+        "cp -rf dependencies uio_generic weka_driver igb_uio  /root/weka-prepackaged",
+        "weka local stop && weka local rm -f --all",
+        "weka agent uninstall --force"
       ]
     }
   ]
