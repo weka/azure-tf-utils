@@ -5,7 +5,7 @@
     "client_id": "{{env `CLIENT_ID`}}",
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
-    "image_rg_name": "weka-image-testing",
+    "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
     "region": "East US",
     "token": "{{env `TOKEN`}}",
     "weka_version": "4.2.5"
@@ -19,8 +19,8 @@
       "tenant_id": "{{user `tenant_id`}}",
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
       "managed_image_name": "weka-testing-ubuntu20.04-kernel5.4-image",
+      "build_resource_group_name": "{{user `image_rg_name`}}",
       "os_type": "Linux",
-      "location": "{{user `region`}}",
 
       "azure_tags": {
         "Image Publisher" : "WekaIO",
