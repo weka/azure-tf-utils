@@ -7,7 +7,7 @@
     "tenant_id": "{{env `TENANT_ID`}}",
     "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
     "region": "East US",
-    "token": "{{env `TOKEN`}}",
+    "token": "{{env `GET_WEKA_IO_TOKEN`}}",
     "weka_version": "4.3.0.311-nightly"
   },
   "builders": [
