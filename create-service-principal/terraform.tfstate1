@@ -1,0 +1,424 @@
+{
+  "version": 4,
+  "terraform_version": "1.7.1",
+  "serial": 6,
+  "lineage": "f752f5ec-607b-bb79-6493-23b5d730f28b",
+  "outputs": {
+    "client_id": {
+      "value": "b6d3cfeb-34a7-4add-8e50-b5ba23b8fabd",
+      "type": "string"
+    },
+    "client_secret": {
+      "value": "drB8Q~qxtIOIOTA4dvFVjOChWECrYgnvW~E_1aqU",
+      "type": "string"
+    },
+    "tenant_id": {
+      "value": "93ba0df2-e204-4bfc-99ef-cb9e273ce33f",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "data",
+      "type": "azuread_client_config",
+      "name": "current",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "client_id": "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
+            "id": "93ba0df2-e204-4bfc-99ef-cb9e273ce33f-04b07795-8ddb-461a-bbee-02f9e1bf7b46-80d17d88-f41a-43e4-a084-a83135928b26",
+            "object_id": "80d17d88-f41a-43e4-a084-a83135928b26",
+            "tenant_id": "93ba0df2-e204-4bfc-99ef-cb9e273ce33f",
+            "timeouts": null
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "data",
+      "type": "azurerm_subscription",
+      "name": "primary",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "display_name": "DEV",
+            "id": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a",
+            "location_placement_id": "Public_2014-09-01",
+            "quota_id": "PayAsYouGo_2014-09-01",
+            "spending_limit": "Off",
+            "state": "Enabled",
+            "subscription_id": "d2f248b9-d054-477f-b7e8-413921532c2a",
+            "tags": {},
+            "tenant_id": "93ba0df2-e204-4bfc-99ef-cb9e273ce33f",
+            "timeouts": null
+          },
+          "sensitive_attributes": []
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azuread_application",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "api": [
+              {
+                "known_client_applications": [],
+                "mapped_claims_enabled": false,
+                "oauth2_permission_scope": [],
+                "requested_access_token_version": 1
+              }
+            ],
+            "app_role": [],
+            "app_role_ids": {},
+            "application_id": "b6d3cfeb-34a7-4add-8e50-b5ba23b8fabd",
+            "description": "",
+            "device_only_auth_enabled": false,
+            "disabled_by_microsoft": "\u003cnil\u003e",
+            "display_name": "drole2-app",
+            "fallback_public_client_enabled": false,
+            "feature_tags": [
+              {
+                "custom_single_sign_on": false,
+                "enterprise": false,
+                "gallery": false,
+                "hide": false
+              }
+            ],
+            "group_membership_claims": null,
+            "id": "958d58d0-8f47-4958-8f19-40786e530017",
+            "identifier_uris": null,
+            "logo_image": "",
+            "logo_url": "",
+            "marketing_url": "",
+            "notes": "",
+            "oauth2_permission_scope_ids": {},
+            "oauth2_post_response_required": false,
+            "object_id": "958d58d0-8f47-4958-8f19-40786e530017",
+            "optional_claims": [
+              {
+                "access_token": [],
+                "id_token": [],
+                "saml2_token": []
+              }
+            ],
+            "owners": [
+              "80d17d88-f41a-43e4-a084-a83135928b26"
+            ],
+            "prevent_duplicate_names": false,
+            "privacy_statement_url": "",
+            "public_client": [
+              {
+                "redirect_uris": []
+              }
+            ],
+            "publisher_domain": "weka10.onmicrosoft.com",
+            "required_resource_access": [],
+            "service_management_reference": "",
+            "sign_in_audience": "AzureADMyOrg",
+            "single_page_application": [
+              {
+                "redirect_uris": []
+              }
+            ],
+            "support_url": "",
+            "tags": [],
+            "template_id": "",
+            "terms_of_service_url": "",
+            "timeouts": null,
+            "web": [
+              {
+                "homepage_url": "",
+                "implicit_grant": [
+                  {
+                    "access_token_issuance_enabled": false,
+                    "id_token_issuance_enabled": false
+                  }
+                ],
+                "logout_url": "",
+                "redirect_uris": []
+              }
+            ]
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJyZWFkIjozMDAwMDAwMDAwMDAsInVwZGF0ZSI6NjAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "data.azuread_client_config.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azuread_service_principal",
+      "name": "sp",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "account_enabled": true,
+            "alternative_names": null,
+            "app_role_assignment_required": false,
+            "app_role_ids": {},
+            "app_roles": [],
+            "application_id": "b6d3cfeb-34a7-4add-8e50-b5ba23b8fabd",
+            "application_tenant_id": "93ba0df2-e204-4bfc-99ef-cb9e273ce33f",
+            "description": "",
+            "display_name": "drole2-app",
+            "feature_tags": [
+              {
+                "custom_single_sign_on": false,
+                "enterprise": false,
+                "gallery": false,
+                "hide": false
+              }
+            ],
+            "features": [
+              {
+                "custom_single_sign_on_app": false,
+                "enterprise_application": false,
+                "gallery_application": false,
+                "visible_to_users": true
+              }
+            ],
+            "homepage_url": "",
+            "id": "5a2da49f-e707-42ed-8905-f8c75fa61a16",
+            "login_url": "",
+            "logout_url": "",
+            "notes": "",
+            "notification_email_addresses": null,
+            "oauth2_permission_scope_ids": {},
+            "oauth2_permission_scopes": [],
+            "object_id": "5a2da49f-e707-42ed-8905-f8c75fa61a16",
+            "owners": [
+              "80d17d88-f41a-43e4-a084-a83135928b26"
+            ],
+            "preferred_single_sign_on_mode": "",
+            "redirect_uris": [],
+            "saml_metadata_url": "",
+            "saml_single_sign_on": [
+              {
+                "relay_state": ""
+              }
+            ],
+            "service_principal_names": [],
+            "sign_in_audience": "AzureADMyOrg",
+            "tags": [],
+            "timeouts": null,
+            "type": "Application",
+            "use_existing": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo2MDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJyZWFkIjozMDAwMDAwMDAwMDAsInVwZGF0ZSI6NjAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "azuread_application.app",
+            "data.azuread_client_config.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azuread_service_principal_password",
+      "name": "sp_password",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azuread\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "display_name": null,
+            "end_date": "2026-04-28T10:36:16Z",
+            "end_date_relative": null,
+            "id": "5a2da49f-e707-42ed-8905-f8c75fa61a16/password/ea5c5c00-4a9d-4797-99b1-040397b76ab4",
+            "key_id": "ea5c5c00-4a9d-4797-99b1-040397b76ab4",
+            "rotate_when_changed": null,
+            "service_principal_id": "5a2da49f-e707-42ed-8905-f8c75fa61a16",
+            "start_date": "2024-04-28T10:36:16Z",
+            "timeouts": null,
+            "value": "drB8Q~qxtIOIOTA4dvFVjOChWECrYgnvW~E_1aqU"
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozMDAwMDAwMDAwMDAsImRlbGV0ZSI6MzAwMDAwMDAwMDAwLCJyZWFkIjozMDAwMDAwMDAwMDAsInVwZGF0ZSI6MzAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "azuread_application.app",
+            "azuread_service_principal.sp",
+            "data.azuread_client_config.current"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_role_assignment",
+      "name": "role_assignment",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "condition": "",
+            "condition_version": "",
+            "delegated_managed_identity_resource_id": "",
+            "description": "",
+            "id": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/denise/providers/Microsoft.Authorization/roleAssignments/cdba2bae-eed5-2c83-6621-212dadb37708",
+            "name": "cdba2bae-eed5-2c83-6621-212dadb37708",
+            "principal_id": "5a2da49f-e707-42ed-8905-f8c75fa61a16",
+            "principal_type": "ServicePrincipal",
+            "role_definition_id": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/providers/Microsoft.Authorization/roleDefinitions/2984cae7-8e72-77b8-d765-2fba7a9aabec",
+            "role_definition_name": "all_drole2_custom_role",
+            "scope": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/denise",
+            "skip_service_principal_aad_check": null,
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxODAwMDAwMDAwMDAwLCJkZWxldGUiOjE4MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjoxODAwMDAwMDAwMDAwfX0=",
+          "dependencies": [
+            "azuread_application.app",
+            "azuread_service_principal.sp",
+            "azurerm_role_definition.custom_role",
+            "data.azuread_client_config.current",
+            "data.azurerm_subscription.primary"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_role_definition",
+      "name": "custom_role",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "assignable_scopes": [
+              "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/denise"
+            ],
+            "description": "Custom Role to allow create weka resources under resource group denise",
+            "id": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/providers/Microsoft.Authorization/roleDefinitions/2984cae7-8e72-77b8-d765-2fba7a9aabec|/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/denise",
+            "name": "all_drole2_custom_role",
+            "permissions": [
+              {
+                "actions": [
+                  "Microsoft.Network/virtualNetworks/write",
+                  "Microsoft.Network/virtualNetworks/delete",
+                  "Microsoft.Network/virtualNetworks/join/action",
+                  "Microsoft.Network/virtualNetworks/subnets/write",
+                  "Microsoft.Network/virtualNetworks/subnets/join/action",
+                  "Microsoft.Network/virtualNetworks/subnets/delete",
+                  "Microsoft.Network/networkSecurityGroups/write",
+                  "Microsoft.Network/networkSecurityGroups/join/action",
+                  "Microsoft.Network/networkSecurityGroups/securityRules/write",
+                  "Microsoft.Network/networkSecurityGroups/securityRules/delete",
+                  "Microsoft.Network/networkSecurityGroups/delete",
+                  "Microsoft.Network/publicIPAddresses/write",
+                  "Microsoft.Network/publicIPAddresses/delete",
+                  "Microsoft.Network/publicIPAddresses/join/action",
+                  "Microsoft.Network/networkInterfaces/write",
+                  "Microsoft.Network/networkInterfaces/join/action",
+                  "Microsoft.Network/networkInterfaces/delete",
+                  "Microsoft.Resources/subscriptions/resourceGroups/write",
+                  "Microsoft.Network/virtualNetworks/read",
+                  "Microsoft.Network/virtualNetworks/subnets/read",
+                  "Microsoft.Network/networkSecurityGroups/read",
+                  "Microsoft.Network/networkSecurityGroups/securityRules/read",
+                  "Microsoft.Network/publicIPAddresses/read",
+                  "Microsoft.Network/networkInterfaces/read",
+                  "Microsoft.Network/networkInterfaces/join/action",
+                  "Microsoft.Network/networkInterfaces/delete",
+                  "Microsoft.Resources/subscriptions/resourceGroups/read",
+                  "Microsoft.Resources/subscriptions/resourceGroups/write",
+                  "Microsoft.Network/privateDnsZones/*",
+                  "Microsoft.Network/privateDnsZones/virtualNetworkLinks/write",
+                  "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete",
+                  "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+                  "Microsoft.Network/privateDnsZones/SOA/*",
+                  "Microsoft.Network/privateDnsZones/A/read",
+                  "Microsoft.Network/privateDnsZones/A/write",
+                  "Microsoft.Network/privateDnsZones/A/delete",
+                  "Microsoft.Compute/proximityPlacementGroups/*",
+                  "Microsoft.Network/virtualNetworks/join/action",
+                  "Microsoft.Network/virtualNetworks/subnets/join/action",
+                  "Microsoft.Network/virtualNetworks/subnets/write",
+                  "Microsoft.Network/virtualNetworks/subnets/delete",
+                  "Microsoft.Network/networkSecurityGroups/join/action",
+                  "Microsoft.Compute/virtualMachines/read",
+                  "Microsoft.KeyVault/vaults/read",
+                  "Microsoft.KeyVault/vaults/write",
+                  "Microsoft.KeyVault/vaults/delete",
+                  "Microsoft.KeyVault/vaults/secrets/read",
+                  "Microsoft.KeyVault/vaults/secrets/write",
+                  "Microsoft.KeyVault/vaults/accessPolicies/write",
+                  "Microsoft.KeyVault/locations/deletedVaults/purge/action",
+                  "Microsoft.Web/*",
+                  "microsoft.web/*",
+                  "Microsoft.Web/connections/Read",
+                  "Microsoft.Web/connections/Write",
+                  "Microsoft.Web/connections/Delete",
+                  "Microsoft.OperationalInsights/workspaces/write",
+                  "Microsoft.OperationalInsights/workspaces/read",
+                  "Microsoft.OperationalInsights/workspaces/delete",
+                  "Microsoft.Storage/storageAccounts/read",
+                  "Microsoft.Storage/storageAccounts/delete",
+                  "Microsoft.Storage/storageAccounts/write",
+                  "Microsoft.Storage/storageAccounts/blobServices/write",
+                  "Microsoft.Storage/storageAccounts/blobServices/read",
+                  "Microsoft.Storage/storageAccounts/listkeys/action",
+                  "Microsoft.Storage/storageAccounts/fileServices/read",
+                  "Microsoft.Compute/virtualMachineScaleSets/*",
+                  "Microsoft.Authorization/roleAssignments/read",
+                  "Microsoft.Authorization/roleAssignments/write",
+                  "Microsoft.Authorization/roleAssignments/delete",
+                  "Microsoft.Resources/deployments/read",
+                  "Microsoft.Resources/deployments/write",
+                  "Microsoft.Resources/deployments/delete",
+                  "Microsoft.Resources/deployments/exportTemplate/action",
+                  "Microsoft.Resources/deployments/validate/action",
+                  "Microsoft.Resources/deployments/operationstatuses/read",
+                  "Microsoft.Logic/workflows/read",
+                  "Microsoft.Logic/workflows/write",
+                  "Microsoft.Logic/workflows/delete",
+                  "Microsoft.Logic/workflows/providers/Microsoft.Insights/diagnosticSettings/read",
+                  "Microsoft.Logic/workflows/providers/Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.Logic/workflows/providers/Microsoft.Insights/logDefinitions/read",
+                  "Microsoft.Logic/integrationAccounts/providers/Microsoft.Insights/logDefinitions/read",
+                  "Microsoft.Insights/*",
+                  "Microsoft.OperationalInsights/workspaces/providers/Microsoft.Insights/diagnosticSettings/Read",
+                  "Microsoft.OperationalInsights/workspaces/providers/Microsoft.Insights/diagnosticSettings/Write",
+                  "Microsoft.OperationalInsights/workspaces/sharedkeys/action",
+                  "Microsoft.AppConfiguration/configurationStores/providers/Microsoft.Insights/diagnosticSettings/read",
+                  "Microsoft.AppConfiguration/configurationStores/providers/Microsoft.Insights/diagnosticSettings/write",
+                  "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+                  "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action"
+                ],
+                "data_actions": null,
+                "not_actions": [],
+                "not_data_actions": null
+              }
+            ],
+            "role_definition_id": "2984cae7-8e72-77b8-d765-2fba7a9aabec",
+            "role_definition_resource_id": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/providers/Microsoft.Authorization/roleDefinitions/2984cae7-8e72-77b8-d765-2fba7a9aabec",
+            "scope": "/subscriptions/d2f248b9-d054-477f-b7e8-413921532c2a/resourceGroups/denise",
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxODAwMDAwMDAwMDAwLCJkZWxldGUiOjE4MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjozNjAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "data.azurerm_subscription.primary"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

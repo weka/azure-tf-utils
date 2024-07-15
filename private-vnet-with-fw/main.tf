@@ -160,7 +160,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "prcg" {
   priority           = 300
   application_rule_collection {
     name     = "appRc1"
-    priority = 101
+    priority = 200
     action   = "Allow"
     rule {
       name = "appRule1"
@@ -178,7 +178,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "prcg" {
   }
   network_rule_collection {
     name     = "netRc1"
-    priority = 200
+    priority = 100
     action   = "Allow"
     rule {
       name                  = "netRule1"
