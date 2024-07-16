@@ -172,8 +172,8 @@ resource "azurerm_firewall_policy_rule_collection_group" "prcg" {
         type = "Https"
         port = 443
       }
-      destination_fqdns = ["www.microsoft.com", "*.blob.core.windows.net", "*.azurewebsites.net"]
-      source_addresses  = [var.private_address_prefixes]
+      destination_fqdns = ["www.microsoft.com", "*.blob.core.windows.net", "*.azurewebsites.net","*.vaultcore.azure.net"]
+      source_addresses  = [var.private_address_prefixes,var.function_app_subnet_delegation_cidr,var.logic_app_subnet_delegation_cidr]
     }
   }
   network_rule_collection {
@@ -183,9 +183,9 @@ resource "azurerm_firewall_policy_rule_collection_group" "prcg" {
     rule {
       name                  = "netRule1"
       protocols             = ["TCP"]
-      source_addresses      = [var.private_address_prefixes]
+      source_addresses      = [var.private_address_prefixes,var.function_app_subnet_delegation_cidr,var.logic_app_subnet_delegation_cidr]
       destination_addresses = ["*"]
-      destination_ports     = ["8000", "8999"]
+      destination_ports     = ["*"]
     }
   }
 }
