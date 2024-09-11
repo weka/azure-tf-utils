@@ -1,6 +1,6 @@
 {
   "variables": {
-    "ofed_version": "5.8-1.1.2.1",
+    "ofed_version": "23.10-0.5.5.0",
     "subscription_id": "{{env `SUBSCRIPTION_ID`}}",
     "client_id": "{{env `CLIENT_ID`}}",
     "client_secret": "{{env `CLIENT_SECRET`}}",
@@ -8,7 +8,8 @@
     "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
     "region": "East US",
     "token": "{{env `TOKEN`}}",
-    "weka_version": "4.2.5"
+    "weka_version": "4.3.4",
+    "kernel_version": "6.2.0-1019"
   },
   "builders": [
     {
@@ -18,7 +19,7 @@
       "client_secret": "{{user `client_secret`}}",
       "tenant_id": "{{user `tenant_id`}}",
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
-      "managed_image_name": "weka-ubuntu20.04-kernel5.4-image-with-rpms-4.2.5",
+      "managed_image_name": "weka-ubuntu22.04-kernel23.10-image-with-rpms-4.3.4",
       "os_type": "Linux",
       "location": "{{user `region`}}",
 
@@ -26,7 +27,7 @@
         "resource_group": "weka-images",
         "gallery_name": "WekaSharedGallery",
         "image_name": "weka_custom_image",
-        "image_version": "1.0.1",
+        "image_version": "2.0.0",
         "replication_regions": [
           "eastus",
           "eastus2",
@@ -56,13 +57,13 @@
       },
       "azure_tags": {
         "Image Publisher" : "WekaIO",
-        "Image Offer": "WekaUbuntu",
-        "Image SKU": "20.04",
-        "Kernel Version": "5.4"
+        "Image Offer": "Ubuntu",
+        "Image SKU": "22.04",
+        "Kernel Version": "23.10"
       },
-      "image_publisher": "Canonical",
-      "image_offer": "0001-com-ubuntu-server-focal",
-      "image_sku": "20_04-lts-gen2",
+      "image_publisher": "canonical",
+      "image_offer": "0001-com-ubuntu-server-jammy",
+      "image_sku": "22_04-lts-gen2",
       "vm_size": "Standard_L8s_v3",
       "ssh_username": "weka"
     }
@@ -74,8 +75,9 @@
             "inline": [
               "set -ex",
               "kernel_version=$(hostnamectl | grep Kernel | awk '{print $3}')",
-              "downgrade_kernel_version=5.4.0-1107",
+              "downgrade_kernel_version={{ user `kernel_version` }}",
               "apt search linux- | grep ${downgrade_kernel_version}-azure | grep -v 'linux-modules-nvidia\\|linux-objects-nvidia\\|signatures\\|linux-modules-extra' | awk -F\"/\" '{print $1}' | xargs -I {} apt install -y {}",
+
               "mv /usr/bin/linux-check-removal /usr/bin/linux-check-removal.orig",
               "echo -e '#!/bin/sh\\necho \"Overriding default linux-check-removal script!\"\\nexit 0' | sudo tee /usr/bin/linux-check-removal",
               "chmod +x /usr/bin/linux-check-removal",
@@ -104,7 +106,7 @@
                  "sleep 2",
               "done",
               "apt remove unattended-upgrades -y",
-              "apt install net-tools -y",
+              "apt install net-tools bzip2 -y",
               "snap install jq"
             ]
           },
@@ -116,10 +118,10 @@
               "INSTALLATION_PATH=/tmp/weka",
               "mkdir -p $INSTALLATION_PATH",
               "OFED_NAME=ofed-{{user `ofed_version`}}",
-              "wget https://content.mellanox.com/ofed/MLNX_OFED-{{user `ofed_version`}}/MLNX_OFED_LINUX-{{user `ofed_version`}}-ubuntu20.04-x86_64.tgz -O $INSTALLATION_PATH/$OFED_NAME.tgz",
+              "wget https://content.mellanox.com/ofed/MLNX_OFED-{{user `ofed_version`}}/MLNX_OFED_LINUX-{{user `ofed_version`}}-ubuntu22.04-x86_64.tgz -O $INSTALLATION_PATH/$OFED_NAME.tgz",
               "tar xf $INSTALLATION_PATH/$OFED_NAME.tgz --directory $INSTALLATION_PATH --one-top-level=$OFED_NAME",
               "cd $INSTALLATION_PATH/$OFED_NAME/*/",
-              "./mlnxofedinstall --without-fw-update --add-kernel-support --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
+              "./mlnxofedinstall --without-fw-update --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
               "/etc/init.d/openibd restart",
               "ofed_info -n",
               "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
