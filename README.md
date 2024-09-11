@@ -4,6 +4,7 @@ azure terrafrom utils
 ### Create Custom image:
 
 Custom image will create on RND subscription, please use packer sp secrets  
+https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/8e3799f8-8d44-4448-9980-836a7dc47880
 ```hcl
 export SUBSCRIPTION_ID=d95fb89e-da05-41c6-8a66-3981e85ee1af
 export CLIENT_ID=8e3799f8-8d44-4448-9980-836a7dc47880
