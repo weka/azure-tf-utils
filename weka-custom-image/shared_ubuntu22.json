@@ -19,7 +19,7 @@
       "client_secret": "{{user `client_secret`}}",
       "tenant_id": "{{user `tenant_id`}}",
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
-      "managed_image_name": "weka-ubuntu22.04-kernel23.10-image-with-rpms-4.3.4",
+      "managed_image_name": "weka-image-ubuntu-22.04",
       "os_type": "Linux",
       "location": "{{user `region`}}",
 
