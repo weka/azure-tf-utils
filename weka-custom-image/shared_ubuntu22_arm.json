@@ -8,7 +8,7 @@
     "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
     "region": "East US",
     "token": "{{env `TOKEN`}}",
-    "weka_version": "4.2.14",
+    "weka_version": "4.3.4",
     "kernel_version": "6.2.0-1019"
   },
   "builders": [
@@ -19,40 +19,17 @@
       "client_secret": "{{user `client_secret`}}",
       "tenant_id": "{{user `tenant_id`}}",
       "managed_image_resource_group_name": "{{user `image_rg_name`}}",
-      "managed_image_name": "weka-image-ubuntu-22.04",
       "os_type": "Linux",
       "location": "{{user `region`}}",
-
       "shared_image_gallery_destination": {
         "resource_group": "weka-images",
         "gallery_name": "WekaSharedGallery",
-        "image_name": "weka_custom_image",
+        "image_name": "weka_custom_image_arm",
         "image_version": "2.0.0",
         "replication_regions": [
           "eastus",
           "eastus2",
-          "brazilsouth",
-          "canadacentral",
-          "centralus",
-          "northcentralus",
-          "southcentralus",
-          "westus",
-          "westus2",
-          "westus3",
-          "francecentral",
-          "germanywestcentral",
-          "northeurope",
-          "westeurope",
-          "uksouth",
-          "swedencentral",
-          "qatarcentral",
-          "australiaeast",
-          "australiasoutheast",
-          "centralindia",
-          "japaneast",
-          "eastasia",
-          "southeastasia",
-          "uaenorth"
+          "centralus"
         ]
       },
       "azure_tags": {
@@ -63,8 +40,8 @@
       },
       "image_publisher": "canonical",
       "image_offer": "0001-com-ubuntu-server-jammy",
-      "image_sku": "22_04-lts-gen2",
-      "vm_size": "Standard_L8s_v3",
+      "image_sku": "22_04-lts-arm64",
+      "vm_size": "Standard_E2ps_v5",
       "ssh_username": "weka"
     }
   ],
