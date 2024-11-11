@@ -25,9 +25,14 @@ chnage version var `weka_version`
 run: `packer build testing_ubuntu20.json`
 
 
+### Create AD domain
+TF_VAR_subscription_id=<subscription-id> TF_VAR_module_name=ad terraform init
+TF_VAR_subscription_id=<subscription-id> TF_VAR_module_name=ad terraform apply
+
+
 #### Creating private network with FW:
 Notion link https://www.notion.so/wekaio/Private-network-with-FW-dc661cc832444145b326581b3bae5f4a
 ```
-TF_VAR_subscription_id=<subscription-id> terraform init
-TF_VAR_subscription_id=<subscription-id> terraform apply
+TF_VAR_subscription_id=<subscription-id> TF_VAR_module_name=network_fw terraform init
+TF_VAR_subscription_id=<subscription-id> TF_VAR_module_name=network_fw terraform apply
 ```
