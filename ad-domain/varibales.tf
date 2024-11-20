@@ -11,6 +11,16 @@ variable "location" {
   default = "East US"
 }
 
+variable "resource_group_name" {
+  type    = string
+  default = null
+}
+
+variable "create_resource_group" {
+  type    = bool
+  default = true
+}
+
 variable "address_space" {
   type    = string
   default = "10.100.0.0/16"
@@ -97,5 +107,13 @@ variable "source_image_id" {
 }
 
 variable "enable_public_ip_address" {
+  default = true
+}
+
+variable "ip_address_allocation_method" {
+  default = "Dynamic"
+}
+
+variable "enable_open_ssh" {
   default = true
 }

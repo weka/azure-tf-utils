@@ -7,7 +7,7 @@ output "ad_public_ip" {
 }
 
 output "rg_name" {
-  value = azurerm_resource_group.rg.name
+  value = data.azurerm_resource_group.rg.name
 }
 
 output "vnet_name" {
