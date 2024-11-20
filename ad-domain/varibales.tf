@@ -11,6 +11,11 @@ variable "location" {
   default = "East US"
 }
 
+variable "resource_group_name" {
+  type    = string
+  default = null
+}
+
 variable "address_space" {
   type    = string
   default = "10.100.0.0/16"
