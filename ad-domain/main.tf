@@ -10,10 +10,12 @@ locals {
     active_directory_domain       = var.active_directory_domain
     active_directory_netbios_name = var.active_directory_netbios_name
   })
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : "${var.prefix}-rg"
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.prefix}-rg"
+  name     = local.resource_group_name
   location = var.location
   tags     = merge({ "ad_domain" : "${var.prefix}-ad" })
 }
