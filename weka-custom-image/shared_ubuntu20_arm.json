@@ -28,7 +28,8 @@
 
         "replication_regions": [
           "eastus",
-          "eastus2"
+          "eastus2",
+          "westeurope"
         ]
       },
       "azure_tags": {
