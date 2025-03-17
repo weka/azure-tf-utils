@@ -41,7 +41,8 @@ resource "azurerm_public_ip" "dc_public_ip" {
   name                = "${var.prefix}-public-ip"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
+  sku                 = "Standard"
   tags                = merge({ "ad_domain" : "${var.prefix}-ad" })
 }
 
