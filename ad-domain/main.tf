@@ -10,18 +10,25 @@ locals {
     active_directory_domain       = var.active_directory_domain
     active_directory_netbios_name = var.active_directory_netbios_name
   })
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : "${var.prefix}-rg"
 }
 
 resource "azurerm_resource_group" "rg" {
-  name     = "${var.prefix}-rg"
+  count    = var.create_resource_group ? 1 : 0
+  name     = local.resource_group_name
   location = var.location
   tags     = merge({ "ad_domain" : "${var.prefix}-ad" })
 }
 
+data "azurerm_resource_group" "rg" {
+  name = local.resource_group_name
+}
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.prefix}-vnet"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
   address_space       = [var.address_space]
   dns_servers         = [cidrhost(var.address_prefix, 10)]
   tags                = merge({ "ad_domain" : "${var.prefix}-ad" })
@@ -29,7 +36,7 @@ resource "azurerm_virtual_network" "vnet" {
 
 resource "azurerm_subnet" "subnet" {
   name                 = "${var.prefix}-subnet"
-  resource_group_name  = azurerm_resource_group.rg.name
+  resource_group_name  = data.azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = [var.address_prefix]
 
@@ -39,17 +46,17 @@ resource "azurerm_subnet" "subnet" {
 resource "azurerm_public_ip" "dc_public_ip" {
   count               = var.enable_public_ip_address ? 1 : 0
   name                = "${var.prefix}-public-ip"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  allocation_method   = "Dynamic"
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
+  allocation_method   = var.ip_address_allocation_method // "Dynamic"
   tags                = merge({ "ad_domain" : "${var.prefix}-ad" })
 }
 
 # network interface - dc
 resource "azurerm_network_interface" "dc_nic" {
   name                = "${var.prefix}-nic"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
   tags                = merge({ "ad_domain" : "${var.prefix}-ad" })
 
   ip_configuration {
@@ -63,8 +70,8 @@ resource "azurerm_network_interface" "dc_nic" {
 
 resource "azurerm_network_security_group" "dc_nsg" {
   name                = "${var.prefix}-nsg"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location            = data.azurerm_resource_group.rg.location
+  resource_group_name = data.azurerm_resource_group.rg.name
 
   # Security rule can also be defined with resource azurerm_network_security_rule, here just defining it inline.
   security_rule {
@@ -123,8 +130,8 @@ resource "azurerm_subnet_network_security_group_association" "dc_subnet_nsg_asso
 #VM object for the DC - contrary to the member server, this one is static so there will be only a single DC
 resource "azurerm_windows_virtual_machine" "vm_domain_controller" {
   name                  = "${var.prefix}-vm"
-  location              = azurerm_resource_group.rg.location
-  resource_group_name   = azurerm_resource_group.rg.name
+  location              = data.azurerm_resource_group.rg.location
+  resource_group_name   = data.azurerm_resource_group.rg.name
   network_interface_ids = [azurerm_network_interface.dc_nic.id]
   size                  = var.vm_size
   admin_username        = var.vm_username
@@ -172,6 +179,8 @@ SETTINGS
 }
 
 resource "azurerm_virtual_machine_extension" "deploy_open_ssh" {
+  count = var.enable_open_ssh ? 1 : 0
+
   name                       = "${var.prefix}-deploy-open-ssh"
   virtual_machine_id         = azurerm_windows_virtual_machine.vm_domain_controller.id
   publisher                  = "Microsoft.Azure.OpenSSH"
