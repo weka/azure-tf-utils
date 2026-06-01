@@ -1,15 +1,12 @@
 {
   "variables": {
-    "ofed_version": "23.10-0.5.5.0",
     "subscription_id": "{{env `SUBSCRIPTION_ID`}}",
     "client_id": "{{env `CLIENT_ID`}}",
     "client_secret": "{{env `CLIENT_SECRET`}}",
     "tenant_id": "{{env `TENANT_ID`}}",
-    "image_rg_name": "{{env `IMAGE_RG_NAME`}}",
     "region": "East US",
     "token": "{{env `TOKEN`}}",
-    "weka_version": "4.3.4",
-    "kernel_version": "6.2.0-1019"
+    "weka_version": "4.3.4"
   },
   "builders": [
     {
@@ -18,25 +15,45 @@
       "client_id": "{{user `client_id`}}",
       "client_secret": "{{user `client_secret`}}",
       "tenant_id": "{{user `tenant_id`}}",
-      "managed_image_resource_group_name": "{{user `image_rg_name`}}",
       "os_type": "Linux",
       "location": "{{user `region`}}",
       "shared_image_gallery_destination": {
         "resource_group": "weka-images",
         "gallery_name": "WekaSharedGallery",
         "image_name": "weka_custom_image_arm",
-        "image_version": "2.0.0",
+        "image_version": "3.0.0",
         "replication_regions": [
           "eastus",
           "eastus2",
-          "centralus"
+          "brazilsouth",
+          "canadacentral",
+          "centralus",
+          "northcentralus",
+          "southcentralus",
+          "westus",
+          "westus2",
+          "westus3",
+          "francecentral",
+          "germanywestcentral",
+          "northeurope",
+          "westeurope",
+          "uksouth",
+          "swedencentral",
+          "qatarcentral",
+          "australiaeast",
+          "australiasoutheast",
+          "centralindia",
+          "japaneast",
+          "eastasia",
+          "southeastasia",
+          "uaenorth"
         ]
       },
       "azure_tags": {
         "Image Publisher" : "WekaIO",
         "Image Offer": "Ubuntu",
         "Image SKU": "22.04",
-        "Kernel Version": "23.10"
+        "version": "latest"
       },
       "image_publisher": "canonical",
       "image_offer": "0001-com-ubuntu-server-jammy",
@@ -46,33 +63,6 @@
     }
   ],
   "provisioners": [
-    {
-            "type": "shell",
-            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
-            "inline": [
-              "set -ex",
-              "kernel_version=$(hostnamectl | grep Kernel | awk '{print $3}')",
-              "downgrade_kernel_version={{ user `kernel_version` }}",
-              "apt search linux- | grep ${downgrade_kernel_version}-azure | grep -v 'linux-modules-nvidia\\|linux-objects-nvidia\\|signatures\\|linux-modules-extra' | awk -F\"/\" '{print $1}' | xargs -I {} apt install -y {}",
-
-              "mv /usr/bin/linux-check-removal /usr/bin/linux-check-removal.orig",
-              "echo -e '#!/bin/sh\\necho \"Overriding default linux-check-removal script!\"\\nexit 0' | sudo tee /usr/bin/linux-check-removal",
-              "chmod +x /usr/bin/linux-check-removal",
-              "dpkg -l | grep \"linux\\-[a-z]*\\-\" | grep ${kernel_version} | awk '{print $2}' | xargs -I {} apt --purge autoremove -y {}"
-            ]
-          },
-          {
-            "type": "shell",
-            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
-            "inline": [
-              "echo 'Restarting VM in 10 seconds'",
-              "sleep 10",
-              "reboot"
-            ],
-            "pause_before": "10s",
-            "pause_after": "30s",
-            "expect_disconnect": true
-          },
           {
             "type": "shell",
             "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
@@ -82,6 +72,7 @@
               "while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do",
                  "sleep 2",
               "done",
+              "apt update",
               "apt remove unattended-upgrades -y",
               "apt install net-tools bzip2 -y",
               "snap install jq"
@@ -91,20 +82,6 @@
             "type": "shell",
             "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
             "inline": [
-              "echo 'Install OFED VM'",
-              "INSTALLATION_PATH=/tmp/weka",
-              "mkdir -p $INSTALLATION_PATH",
-              "OFED_NAME=ofed-{{user `ofed_version`}}",
-              "wget https://content.mellanox.com/ofed/MLNX_OFED-{{user `ofed_version`}}/MLNX_OFED_LINUX-{{user `ofed_version`}}-ubuntu22.04-x86_64.tgz -O $INSTALLATION_PATH/$OFED_NAME.tgz",
-              "tar xf $INSTALLATION_PATH/$OFED_NAME.tgz --directory $INSTALLATION_PATH --one-top-level=$OFED_NAME",
-              "cd $INSTALLATION_PATH/$OFED_NAME/*/",
-              "./mlnxofedinstall --without-fw-update --dpdk --force 2>&1 | tee /tmp/weka_ofed_installation",
-              "/etc/init.d/openibd restart",
-              "ofed_info -n",
-              "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
-              "echo \"Installing az cli\"",
-              "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
-              "echo \"Installed kernel version:\" $(hostnamectl | grep Kernel | awk '{print $3}')",
               "curl https://{{ user `token` }}@get.weka.io/dist/v1/install/{{ user `weka_version` }}/{{ user `weka_version` }} | sh",
               "mkdir /root/weka-prepackaged",
               "cd /opt/weka/data",
