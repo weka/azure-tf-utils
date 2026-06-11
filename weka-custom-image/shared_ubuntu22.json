@@ -73,10 +73,10 @@
               "while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do",
                  "sleep 2",
               "done",
+              "add-apt-repository -y universe",
               "apt update",
               "apt remove unattended-upgrades -y",
-              "apt install net-tools bzip2 -y",
-              "snap install jq"
+              "apt install net-tools bzip2 jq -y"
             ]
           },
           {

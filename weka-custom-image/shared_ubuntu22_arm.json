@@ -73,9 +73,9 @@
                  "sleep 2",
               "done",
               "apt update",
+              "add-apt-repository -y universe",
               "apt remove unattended-upgrades -y",
-              "apt install net-tools bzip2 -y",
-              "snap install jq"
+              "apt install net-tools bzip2 jq -y"
             ]
           },
           {
