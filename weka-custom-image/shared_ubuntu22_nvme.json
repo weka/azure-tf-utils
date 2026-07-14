@@ -1,0 +1,107 @@
+{
+  "variables": {
+    "subscription_id": "{{env `SUBSCRIPTION_ID`}}",
+    "client_id": "{{env `CLIENT_ID`}}",
+    "client_secret": "{{env `CLIENT_SECRET`}}",
+    "tenant_id": "{{env `TENANT_ID`}}",
+    "region": "East US",
+    "token": "{{env `TOKEN`}}",
+    "weka_version": "4.2.14"
+  },
+  "builders": [
+    {
+      "type": "azure-arm",
+      "subscription_id": "{{user `subscription_id`}}",
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "tenant_id": "{{user `tenant_id`}}",
+      "os_type": "Linux",
+      "location": "{{user `region`}}",
+
+      "shared_image_gallery_destination": {
+        "resource_group": "weka-images",
+        "gallery_name": "WekaSharedGallery",
+        "image_name": "weka_custom_image_nvme",
+        "image_version": "1.0.0",
+        "replication_regions": [
+          "eastus",
+          "eastus2",
+          "brazilsouth",
+          "canadacentral",
+          "centralus",
+          "northcentralus",
+          "southcentralus",
+          "westus",
+          "westus2",
+          "westus3",
+          "francecentral",
+          "germanywestcentral",
+          "northeurope",
+          "westeurope",
+          "uksouth",
+          "swedencentral",
+          "qatarcentral",
+          "australiaeast",
+          "australiasoutheast",
+          "centralindia",
+          "japaneast",
+          "eastasia",
+          "southeastasia",
+          "uaenorth"
+        ]
+      },
+      "azure_tags": {
+        "Image Publisher" : "WekaIO",
+        "Image Offer": "Ubuntu",
+        "Image SKU": "22.04-nvme",
+        "Disk Controller": "SCSI,NVMe",
+        "version": "latest"
+      },
+      "image_publisher": "canonical",
+      "image_offer": "0001-com-ubuntu-server-jammy",
+      "image_sku": "22_04-lts-gen2",
+      "vm_size": "Standard_L8s_v3",
+      "ssh_username": "weka"
+    }
+  ],
+  "provisioners": [
+          {
+            "type": "shell",
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "inline": [
+              "systemctl stop unattended-upgrades",
+              "systemctl disable unattended-upgrades",
+              "while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/{lock,lock-frontend} >/dev/null 2>&1; do",
+                 "sleep 2",
+              "done",
+              "add-apt-repository -y universe",
+              "apt update",
+              "apt remove unattended-upgrades -y",
+              "apt install net-tools bzip2 jq -y"
+            ]
+          },
+          {
+            "type": "shell",
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "inline": [
+              "curl https://{{ user `token` }}@get.weka.io/dist/v1/install/{{ user `weka_version` }}/{{ user `weka_version` }} | sh",
+              "mkdir /root/weka-prepackaged",
+              "cd /opt/weka/data",
+              "cp -rf dependencies uio_generic weka_driver igb_uio  /root/weka-prepackaged",
+              "weka local stop && weka local rm -f --all",
+              "weka agent uninstall --force"
+            ]
+          },
+          {
+            "type": "shell",
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E sh '{{ .Path }}'",
+            "inline": [
+              "echo 'Ensure NVMe driver is present in initramfs so the OS can boot from an NVMe disk controller (Lsv4/v6 SKUs)'",
+              "set -ex",
+              "grep -qxF 'nvme' /etc/initramfs-tools/modules || echo 'nvme' | sudo tee -a /etc/initramfs-tools/modules",
+              "sudo update-initramfs -u -k all",
+              "lsinitramfs /boot/initrd.img-$(uname -r) | grep -q nvme || { echo 'ERROR: nvme module missing from initramfs'; exit 1; }"
+            ]
+          }
+    ]
+}

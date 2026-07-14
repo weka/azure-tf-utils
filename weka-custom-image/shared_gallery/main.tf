@@ -39,6 +39,26 @@ resource "azurerm_shared_image" "image" {
   }
 }
 
+resource "azurerm_shared_image" "image_nvme" {
+  name                                = "weka_custom_image_nvme"
+  gallery_name                        = azurerm_shared_image_gallery.gallery.name
+  resource_group_name                 = var.rg_shared_name
+  location                            = var.location
+  accelerated_network_support_enabled = true
+  disk_controller_type_nvme_enabled   = true
+  architecture                        = "x64"
+  os_type                             = "Linux"
+  hyper_v_generation                  = "V2"
+
+
+  description = "Ubuntu 22.04 LTS Weka custom image definition"
+  identifier {
+    offer     = "WekaUbuntu"
+    publisher = "WekaIO"
+    sku       = "22.04"
+  }
+}
+
 resource "azurerm_shared_image" "image_arm" {
   name                                = "weka_custom_image_arm"
   gallery_name                        = azurerm_shared_image_gallery.gallery.name
