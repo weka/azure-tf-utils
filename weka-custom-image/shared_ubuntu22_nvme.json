@@ -22,7 +22,7 @@
         "resource_group": "weka-images",
         "gallery_name": "WekaSharedGallery",
         "image_name": "weka_custom_image_nvme",
-        "image_version": "1.0.0",
+        "image_version": "1.0.1",
         "replication_regions": [
           "eastus",
           "eastus2",
